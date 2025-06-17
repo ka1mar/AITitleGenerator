@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cosmic Title Generator</title>
+    <style>
+        :root {
+            --primary: #0A192F;
+            --secondary: #172A45;
+            --accent: #64FFDA;
+            --text: #CCD6F6;
+        }
+
+        body {
+            background: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        textarea {
+            width: 95%;
+            height: 160px;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            resize: vertical;
+            min-height: 150px;
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        select {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            background: var(--secondary);
+            color: var(--text);
+            border: 2px solid var(--accent);
+            cursor: pointer;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--accent), #6C63FF);
+            color: var(--primary);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 1rem auto;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        #result {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stars {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="container">
+        <h1>🌌 AI Cosmic Title Generator</h1>
+        
+        <form id="generatorForm">
+            <label for="abstract">📡 Research Abstract:</label><br>
+            <textarea id="abstract" name="abstract" 
+                      placeholder="Enter your research abstract here...\n\nExample:\n'This study examines quantum machine learning algorithms...'"
+                      rows="12"></textarea>
+            
+            <div style="text-align: center;">
+                <label for="category">🚀 Title Style:</label>
+                <select id="category" name="category">
+                    <option value="standard">🪐 Standard</option>
+                    <option value="humorous">🌠 Humorous</option>
+                    <option value="concise">⚡ Concise</option>
+                </select>
+            </div>
+
+            <button type="submit">Generate Title 🌟</button>
+        </form>
+
+        <div class="loading">Scanning the cosmos...</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function createStars() {
+            const container = document.querySelector('.stars');
+            for(let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.cssText = `
+                    width: ${Math.random() * 2}px;
+                    height: ${Math.random() * 2}px;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    animation-duration: ${1 + Math.random() * 3}s;
+                    animation-delay: ${Math.random() * 2}s;
+                `;
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        document.getElementById('generatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const abstract = document.getElementById('abstract').value;
+            const category = document.getElementById('category').value;
+            
+            document.querySelector('.loading').style.display = 'block';
+            document.getElementById('result').innerHTML = '';
+
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ abstract, category }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.loading').style.display = 'none';
+                if (data.error) {
+                    document.getElementById('result').innerHTML = 
+                        `⚠️ Error: ${data.error}`;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <h3>✨ Generated Title:</h3>
+                        <p style="font-size: 1.2rem; background: rgba(0,0,0,0.2); 
+                               padding: 1rem; border-radius: 8px;">
+                            "${data.title}"
+                        </p>
+                        <button onclick="navigator.clipboard.writeText('${data.title}')">
+                            📋 Copy to Clipboard
+                        </button>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.querySelector('.loading').style.display = 'none';
+                document.getElementById('result').innerHTML = 
+                    `⚠️ Error: ${error.message}`;
+            });
+        });
+    </script>
+</body>
+</html>
