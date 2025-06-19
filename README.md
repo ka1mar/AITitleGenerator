@@ -17,7 +17,6 @@ This project explores small language models (<2B parameters) for generating scie
 ## 🚀 Quick Start
 ### Prerequisites
 - Conda package manager
-- NVIDIA GPU (recommended)
 
 ### Installation
 ```bash
